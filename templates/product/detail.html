@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+
+{% block title %} {{ obj.name }} {% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto flex flex-wrap py-6 px-6 xl:px-0">
+    <div class="images w-full mb-5 lg:mb-0 lg:w-3/5">
+        <img src="{% if obj.image %} {{ obj.image.url }} {% else %} http://placehold.jp/9797a1/ffffff/240x240.jpg {% endif %}" class="rounded-xl">
+    </div>
+
+    <div class="product-info w-full lg:w-2/5 lg:p-6">
+        <h1 class="text-2xl"> {{ obj.name }}</h1>
+
+        <p class="mt-1 text-gray-400"> {{ obj.get_display_price }}</p>
+
+        {% if obj.get_rating > 0 %}
+        <p class="mt-1 text-gray-400">Rating: {{ obj.get_rating }} / 6</p>
+        {% endif %}
+
+        {% if obj.description %}
+            <p class="mt-6 text-gray-700"> {{ obj.description }}</p>
+        {% endif %}
+
+        <a 
+            href="#" 
+            class="mt-6 inline-block px-8 py-4 rounded-xl bg-purple-500 text-white hover:bg-purple-700"
+            hx-get="{% url 'cart:add_to_cart' obj.id %}"
+            hx-target="#menu-cart-button"
+            hx-swap="outerHTML"
+        >
+            Add to cart
+        </a>
+    </div>
+    <div class="w-full mt-6 ">
+        <h2 class="text-xl">Reviews</h2>
+
+        {% if request.user.is_authenticated %}
+            <form method="POST" action="." class="mt-6 mb-6 px-4 py-2 bg-gray-100 rounded-xl">
+                {% csrf_token %}
+
+                <div>
+                    <label>Rating:</label>
+                    <select name="rating">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Comment:</label><br>
+                    <textarea name="content"></textarea>
+                </div>
+                <div>
+                    <button class="px-4 py-2 bg-purple-500 hover:bg-purple-700 rounded-xl" type="submit">Save</button>
+                </div>
+            </form>
+        {% endif %}
+
+        {% for review in obj.reviews.all %}
+            <div class="px-4 py-6 bg-gray-100 rounded-xl mb-4">
+                <strong>Rating: </strong>{{ review.rating }}/6<br>
+                <strong>Date:</strong> {{ review.created_at|date:"Y-m-d" }}<br>
+                <strong>Comment: </strong> {{ review.content }}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
